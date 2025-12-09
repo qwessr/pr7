@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -6,12 +7,15 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 
 namespace HttpNewsPAT
 {
     internal class Program
     {
         static Cookie Token;
+        static string logFilePath = "debug_trace.log";
+
 
 
         static void Main(string[] args)
@@ -29,6 +33,20 @@ namespace HttpNewsPAT
             response.Close();
             Console.Read();
 
+        }
+        public static void ParsingHtml(string htmlCode)
+        {
+            var html = new HtmlDocument();
+            html.LoadHtml(htmlCode);
+            var Document = html.DocumentNode;
+            IEnumerable DivsNews = Document.Descendants(0).Where(n => n.HasClass("news"));
+            foreach (HtmlNode DivNews in DivsNews)
+            {
+                var src = DivNews.ChildNodes[1].GetAttributeValue("src", "none");
+                var name = DivNews.ChildNodes[3].InnerText;
+                var description = DivNews.ChildNodes[5].InnerText;
+                Console.WriteLine(name + "\n" + "Изображение: " + src + "\n" + "Описание: " + description + "\n");
+            }
         }
 
         public static string GetContent(string url)
@@ -79,6 +97,22 @@ namespace HttpNewsPAT
                 }
             }
 
+        }
+
+        public static void WriteToLog(string message)
+        {
+            try
+            {
+                string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}";
+
+                File.AppendAllText(logFilePath, logMessage + Environment.NewLine);
+
+                Debug.WriteLine(logMessage);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка записи в лог: {ex.Message}");
+            }
         }
     }
 }
