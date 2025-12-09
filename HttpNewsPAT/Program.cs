@@ -11,6 +11,9 @@ namespace HttpNewsPAT
 {
     internal class Program
     {
+        static Cookie Token;
+
+
         static void Main(string[] args)
         {
             SingIn("emilys", "emilyspass");
@@ -27,6 +30,20 @@ namespace HttpNewsPAT
             Console.Read();
 
         }
+
+        public static string GetContent(string url)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.CookieContainer = new CookieContainer();
+            request.CookieContainer.Add(Token);
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
         public static void SingIn(string username, string password)
         {
             CookieContainer cookieContainer = new CookieContainer();
